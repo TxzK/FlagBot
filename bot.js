@@ -160,13 +160,8 @@ async function genPage(flags) {
                 border-bottom: var(--pico-border-width) solid var(--pico-secondary-border);
             }
 
-            button:not(li > button) {
-                display: block;
-                width: 100%;
-                margin-bottom: var(--pico-spacing);
-            }
-
             svg { height: 1.5em }
+            div[role=group] { width: 100% }
             .list, details { padding: 0; margin: 0 }
             .list > li { list-style: none; margin: 0; padding: var(--pico-spacing) 0 }
             .list > li:not(:last-of-type) { border-bottom: var(--pico-border-width) solid var(--pico-secondary-border) }
@@ -213,9 +208,16 @@ async function genPage(flags) {
                 <hr>
             </section>
 
-            <button onclick="document.querySelectorAll('details').forEach(e => e.open ? e.open = false : e.open = true)">
-                Toggle All
-            </button>
+            <div role="group">
+                <button class="outline" onclick="document.querySelectorAll('details').forEach(e => e.open = true)">
+                    <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z"/><path d="M14 12a2 2 0 1 0 4 0 2 2 0 1 0-4 0"/><path d="M2 12a6 6 0 0 1 6-6h8a6 6 0 0 1 6 6v0a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6z"/></svg>
+                    Expand All
+                </button>
+                <button class="outline" onclick="document.querySelectorAll('details').forEach(e => e.open = false)">
+                    <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z"/><path d="M6 12a2 2 0 1 0 4 0 2 2 0 1 0-4 0"/><path d="M2 12a6 6 0 0 1 6-6h8a6 6 0 0 1 6 6v0a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6z"/></svg>
+                    Collapse All
+                </button>
+            </div>
 
             <br>
 
