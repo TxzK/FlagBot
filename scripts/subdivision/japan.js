@@ -28,7 +28,5 @@ async function download(gallery, dir) {
     }
 }
 
-export default async function japan() {
-    await download(0, 'subdivision');
-    await download(2, 'former');
-}
+await download(0, 'subdivision');
+await download(2, 'former');

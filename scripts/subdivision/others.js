@@ -37,8 +37,6 @@ const flags = [
     },
 ];
 
-export default async function others() {
-    for (const flag of flags) {
-        await save(flag, 'subdivision');
-    }
+for (const flag of flags) {
+    await save(flag, 'subdivision');
 }
