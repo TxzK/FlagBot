@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { JSDOM } from 'jsdom';
 import { save } from '../shared.js';
 

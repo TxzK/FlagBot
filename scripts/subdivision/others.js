@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { save } from '../shared.js';
 
 const flags = [
