@@ -200,13 +200,12 @@ async function genPage(flags) {
         </header>
 
         <main class="container">
-            <section>
+            <hgroup>
                 <h1>All Flags</h1>
-                <p>Currently it has ${flags.length} flags.</p>`
+                <p>Currently it has ${flags.length} flags.</p>
+            </hgroup>
 
-        page += `
-                <hr>
-            </section>
+            <hr>
 
             <div role="group">
                 <button class="outline" onclick="document.querySelectorAll('details').forEach(e => e.open = true)">
