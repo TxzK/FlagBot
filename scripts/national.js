@@ -12,15 +12,7 @@ const flags = new JSDOM(await (await fetch(flagSrc)).text()).window.document
 
 for (const flag of flags) {
     const link = flag.querySelector('.gallerytext > a');
-    const fullName = link.innerHTML;
-
-    let name;
-
-    if (fullName.includes(',')) {
-        name = `${fullName.split(', ')[1]} ${fullName.split(',')[0]}`;
-    } else {
-        name = fullName;
-    }
+    const name = link.innerHTML.replace(/^Flag of (the )?/, '').trim();
 
     await save({
         name,
