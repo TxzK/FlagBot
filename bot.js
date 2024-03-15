@@ -26,12 +26,35 @@ const POST_VISIBILITY = process.env.FLAGBOT_POST_VISIBILITY || 'private';
 const STATUS_INTERVAL = process.env.FLAGBOT_STATUS_INTERVAL || '0 */15 * * * *';
 const DISPLAY_NAME_INTERVAL = process.env.FLAGBOT_DISPLAY_NAME_INTERVAL || '0 */5 * * * *';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || '3000';
 
-const log = (msg, color) => console.error(`[${
-    new Date().toString().replace(/^\w+ /, '').replace(/[0-9]{4} /, '').replace(/ \(.*\)$/, '')
-}] \x1b[3${color}m${msg}\x1b[0m`);
+// Print logs
+function log(msg, msgType) {
+    const time = new Date().toString()
+        .replace(/^\w+ /, '').replace(/[0-9]{4} /, '').replace(/ \(.*\)$/, '');
 
+    let typeStr = msgType.toUpperCase();
+    let color = 7; // white
+
+    switch (msgType) {
+        case 'error':
+            color = 1; // red
+            break;
+        case 'success':
+            color = 2; // green
+            break;
+        case 'warning':
+            color = 3; // yellow
+            break;
+        case 'info':
+            color = 4; // blue
+            break;
+    }
+
+    console.error(`[${time}; \x1b[4${color};30m${typeStr}\x1b[0m] \x1b[3${color}m${msg}\x1b[0m`);
+}
+
+// Randomly choose an item from an array
 const randChoose = arr => arr[Math.floor(Math.random() * arr.length)];
 
 function genFlagTitle(type, details) {
@@ -91,7 +114,7 @@ async function postStatus(masto, flags) {
 
     if (viu.status === 0) preview = viu.stdout.toString();
 
-    log(`Posting`, 4);
+    log(`Posting`, 'info');
     console.error(`${preview}${statusStr}`);
 
     if (POST === '1') {
@@ -108,12 +131,12 @@ async function postStatus(masto, flags) {
                 visibility: POST_VISIBILITY,
             });
 
-            log(`Successfully posted! ${status.url} (${POST_VISIBILITY})`, 2);
+            log(`Successfully posted! ${status.url} (${POST_VISIBILITY})`, 'success');
         } catch (e) {
-            log(`Error! ${e.message}`, 1);
+            log(`Error! ${e.message}`, 'error');
         }
     } else {
-        log(`Didn't post as FLAGBOT_POST is not set to 1`, 3);
+        log(`Didn't post as FLAGBOT_POST is not set to 1`, 'warning');
     }
 }
 
@@ -121,20 +144,20 @@ async function updateDisplayName(masto, emojis) {
     const [emoji_1, emoji_2] = [randChoose(emojis), randChoose(emojis)];
     const displayName = `${emoji_1} FlagBot ${emoji_2}`;
 
-    log(`Changing display name to ${displayName}`, 4);
+    log(`Changing display name to ${displayName}`, 'info');
     if (POST === '1') {
         try {
             await masto.v1.accounts.updateCredentials({ displayName });
-            log(`Successfully changed!`, 2);
+            log(`Successfully changed!`, 'success');
         } catch (e) {
-            log(`Error! ${e.message}`, 1);
+            log(`Error! ${e.message}`, 'error');
         }
     } else {
-        log(`Didn't change as FLAGBOT_POST is not set to 1`, 3);
+        log(`Didn't change as FLAGBOT_POST is not set to 1`, 'warning');
     }
 }
 
-// generating the page consisting of a list of all flags
+// Generate the webpage consisting of a list of all flags
 async function genPage(flags) {
     const getSiteTitle = async url => new JSDOM(await (await fetch(url)).text())
         .window.document.title;
@@ -312,7 +335,7 @@ try {
         accessToken: MASTODON_TOKEN,
     });
 
-    // getting all the flags
+    // getting the flags
     const types = readdirSync('./flags');
     const flags = [];
 
@@ -325,7 +348,7 @@ try {
     // getting the emojis
     const emojis = JSON.parse(readFileSync('./flag_emojis.json').toString());
 
-    log(`Imported ${flags.length} flags`, 4);
+    log(`Imported ${flags.length} flags`, 'info');
 
     // Updating fields
     const fieldsAttributes = [];
@@ -350,18 +373,18 @@ try {
         value: SOURCE_CODE,
     });
 
-    log(`Updating profile fields attributes`, 4);
+    log(`Updating profile fields attributes`, 'info');
     if (POST === '1') {
         await masto.v1.accounts.updateCredentials({ fieldsAttributes });
     } else {
-        log(`Didn't update as FLAGBOT_POST is not set to 1`, 3);
+        log(`Didn't update as FLAGBOT_POST is not set to 1`, 'warning');
     }
 
     let server;
 
     // Creating server
     if (SERVER === '1') {
-        log('Generating webpage for the server', 4);
+        log('Generating webpage for the server', 'info');
         const page = await genPage(flags);
 
         server = createServer((req, res) => {
@@ -383,18 +406,18 @@ try {
         });
 
         server.listen(PORT, () => {
-            log(`Server started at port ${PORT}`, 2);
+            log(`Server started at port ${PORT}`, 'success');
         });
     } else {
-        log(`Didn't start the server as FLAGBOT_SERVER is not set to 1`, 3);
+        log(`Didn't start the server as FLAGBOT_SERVER is not set to 1`, 'warning');
     }
 
     const job_1 = new CronJob(STATUS_INTERVAL, () => postStatus(masto, flags), null, true);
     const job_2 = new CronJob(DISPLAY_NAME_INTERVAL, () => updateDisplayName(masto, emojis), null, true);
-    log('Bot started', 2);
+    log('Bot started', 'success');
 
     const exit = () => {
-        log("Exiting", 3);
+        log("Exiting", 'warning');
         job_1.stop();
         job_2.stop();
 
@@ -404,6 +427,6 @@ try {
     process.on("SIGINT", exit);
     process.on("SIGTERM", exit);
 } catch (e) {
-    log(`Couldn't start! ${e.message}`, 1);
+    log(`Couldn't start! ${e.message}`, 'error');
     process.exit(1);
 }
